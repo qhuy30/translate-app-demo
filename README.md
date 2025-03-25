@@ -335,7 +335,99 @@ const styles = StyleSheet.create({
 Bước 10: Cập nhật App.js để tích hợp các components mới
 Cập nhật file App.js để thêm các components mới:
 ```sh
-npx expo start
+import React, { useState } from 'react';
+import { SafeAreaView, StatusBar, View, Text } from 'react-native';
+import { styles } from './src/constants/style';
+import { LanguageSelector } from './src/components/LanguageSelector';
+import { TranslationInput } from './src/components/TranslationInput';
+import { TranslationResult } from './src/components/TranslationResult';
+
+export default function App() {
+  // Khởi tạo state
+  const [text, setText] = useState("");
+  const [translatedText, setTranslatedText] = useState("");
+  const [sourceLang, setSourceLang] = useState("en");
+  const [targetLang, setTargetLang] = useState("vi");
+  const [autoDetect, setAutoDetect] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const swapLanguages = () => {
+    setSourceLang(targetLang);
+    setTargetLang(sourceLang);
+  };
+
+  const speakTranslation = () => {
+    // TODO: Thêm logic text-to-speech
+  };
+
+  const copyToClipboard = () => {
+    // TODO: Thêm logic copy văn bản
+  };
+
+  const translateText = async (text, sourceLang, targetLang) => {
+    // TODO: Gọi API dịch
+    return `Bản dịch của: ${text}`;
+  };
+
+  const handleDetectLanguage = async () => {
+    // TODO: Tự động nhận diện ngôn ngữ
+  };
+
+  const handleTranslate = async () => {
+    if (!text.trim()) return;
+
+    setIsLoading(true);
+    try {
+      if (autoDetect) {
+        await handleDetectLanguage();
+      }
+
+      const result = await translateText(text, sourceLang, targetLang);
+      setTranslatedText(result);
+    } catch (error) {
+      setError("Translation failed");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <StatusBar backgroundColor="#f8f8f8" barStyle="dark-content" />
+
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Quick Translator</Text>
+      </View>
+
+      <LanguageSelector
+        sourceLang={sourceLang}
+        targetLang={targetLang}
+        autoDetect={autoDetect}
+        onSourcePress={() => {/* TODO */}}
+        onTargetPress={() => {/* TODO */}}
+        onSwapPress={swapLanguages}
+      />
+
+      <TranslationInput
+        text={text}
+        setText={setText}
+        clearText={() => setText("")}
+      />
+
+      {translatedText && (
+        <TranslationResult
+          translatedText={translatedText}
+          onSpeak={speakTranslation}
+          onCopy={copyToClipboard}
+          onFavorite={() => {/* TODO */}}
+          isFavorite={false}
+        />
+      )}
+    </SafeAreaView>
+  );
+}
 ```
 
 ## 5. Chạy ứng dụng

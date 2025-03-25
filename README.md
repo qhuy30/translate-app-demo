@@ -658,23 +658,9 @@ const styles = StyleSheet.create({
 Bước 13: Cập nhật App.js để tích hợp các Modal
 Thêm vào App.js:
 ```sh
-import React, { useState, useCallback } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  SafeAreaView,
-  StatusBar,
-  ActivityIndicator,
-  Keyboard,
-  Alert,
-} from "react-native";
-import * as Speech from "expo-speech";
-import * as Clipboard from "expo-clipboard";
-
+import React, { useState } from 'react';
+import { SafeAreaView, StatusBar, View, Text } from 'react-native';
 import { styles } from './src/constants/styles';
-import { LANGUAGES } from './src/constants/languages';
-import { detectLanguage, translateText } from './src/utils/translation';
 import { LanguageSelector } from './src/components/LanguageSelector';
 import { TranslationInput } from './src/components/TranslationInput';
 import { TranslationResult } from './src/components/TranslationResult';
@@ -682,236 +668,116 @@ import { LanguagePicker } from './src/components/LanguagePicker';
 import { HistoryModal } from './src/components/HistoryModal';
 
 export default function App() {
+  // Khởi tạo state
   const [text, setText] = useState("");
   const [translatedText, setTranslatedText] = useState("");
   const [sourceLang, setSourceLang] = useState("en");
   const [targetLang, setTargetLang] = useState("vi");
-  const [history, setHistory] = useState([]);
-  const [favorites, setFavorites] = useState([]);
+  const [autoDetect, setAutoDetect] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [showLanguagePicker, setShowLanguagePicker] = useState(false);
-  const [pickerType, setPickerType] = useState("source");
+  const [pickerType, setPickerType] = useState('source');
   const [showHistory, setShowHistory] = useState(false);
-  const [autoDetect, setAutoDetect] = useState(false);
-  const [detectResult, setDetectResult] = useState("");
-
-  const handleDetectLanguage = async () => {
-    if (!text.trim()) return;
-    
-    setIsLoading(true);
-    try {
-      const detectedCode = await detectLanguage(text);
-      if (detectedCode) {
-        setSourceLang(detectedCode);
-        setDetectResult(`Detected: ${LANGUAGES.find(l => l.code === detectedCode)?.name || detectedCode}`);
-      }
-    } catch (error) {
-      console.error("Language detection error: ", error);
-      setError("Could not detect language");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleTranslate = async () => {
-    if (!text.trim()) return;
-    
-    Keyboard.dismiss();
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      if (autoDetect) {
-        await handleDetectLanguage();
-      }
-      
-      const result = await translateText(text, sourceLang, targetLang);
-      if (result) {
-        setTranslatedText(result);
-        
-        const newTranslation = {
-          id: Date.now().toString(),
-          text,
-          translation: result,
-          sourceLang,
-          targetLang,
-          timestamp: new Date().toISOString(),
-          isFavorite: false
-        };
-        
-        const newHistory = [newTranslation, ...history];
-        setHistory(newHistory);
-      } else {
-        setError("Translation failed");
-      }
-    } catch (error) {
-      console.error("Translation error: ", error);
-      setError("Network error. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const swapLanguages = () => {
-    if (autoDetect) {
-      setAutoDetect(false);
-    }
-    
-    setSourceLang(targetLang);
-    setTargetLang(sourceLang);
-    setText(translatedText);
-    setTranslatedText("");
-  };
-
-  const copyToClipboard = async () => {
-    if (!translatedText) return;
-    
-    await Clipboard.setStringAsync(translatedText);
-    Alert.alert("Thông báo", "Đã sao chép văn bản!");
-  };
-
-  const speakTranslation = () => {
-    if (!translatedText) return;
-    
-    Speech.speak(translatedText, { 
-      language: targetLang,
-      rate: 0.9,
-      pitch: 1.0 
-    });
-  };
-
-  const toggleFavorite = useCallback((item) => {
-    const isFavorite = favorites.some(fav => fav.id === item.id);
-    let newFavorites;
-    
-    if (isFavorite) {
-      newFavorites = favorites.filter(fav => fav.id !== item.id);
-    } else {
-      newFavorites = [...favorites, { ...item, isFavorite: true }];
-    }
-    
-    setFavorites(newFavorites);
-  }, [favorites]);
-
-  const applyHistoryItem = (item) => {
-    setText(item.text);
-    setTranslatedText(item.translation);
-    setSourceLang(item.sourceLang);
-    setTargetLang(item.targetLang);
-    setShowHistory(false);
-  };
-
-  const clearText = () => {
-    setText("");
-    setTranslatedText("");
-    setError(null);
-  };
+  const [history, setHistory] = useState([]); // ⬅️ Thêm state cho lịch sử dịch
+  const [favorites, setFavorites] = useState([]); // ⬅️ Thêm state cho mục yêu thích
 
   const openLanguagePicker = (type) => {
     setPickerType(type);
     setShowLanguagePicker(true);
   };
 
+  const swapLanguages = () => {
+    setSourceLang(targetLang);
+    setTargetLang(sourceLang);
+  };
+
+  const speakTranslation = () => {
+    // TODO: Thêm logic text-to-speech
+  };
+
+  const copyToClipboard = () => {
+    // TODO: Thêm logic copy văn bản
+  };
+
+  const translateText = async (text, sourceLang, targetLang) => {
+    // TODO: Gọi API dịch
+    return `Bản dịch của: ${text}`;
+  };
+
+  const handleDetectLanguage = async () => {
+    // TODO: Tự động nhận diện ngôn ngữ
+  };
+
+  const handleTranslate = async () => {
+    if (!text.trim()) return;
+
+    setIsLoading(true);
+    try {
+      if (autoDetect) {
+        await handleDetectLanguage();
+      }
+
+      const result = await translateText(text, sourceLang, targetLang);
+      setTranslatedText(result);
+
+      // Thêm vào lịch sử dịch
+      const newEntry = { text, translatedText: result, sourceLang, targetLang };
+      setHistory([newEntry, ...history]);
+
+    } catch (error) {
+      setError("Translation failed");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Xử lý chọn từ lịch sử
+  const applyHistoryItem = (item) => {
+    setText(item.text);
+    setTranslatedText(item.translatedText);
+    setSourceLang(item.sourceLang);
+    setTargetLang(item.targetLang);
+    setShowHistory(false);
+  };
+
+  // Xử lý thêm/bỏ yêu thích
+  const toggleFavorite = (item) => {
+    const isFav = favorites.some(fav => fav.text === item.text);
+    if (isFav) {
+      setFavorites(favorites.filter(fav => fav.text !== item.text));
+    } else {
+      setFavorites([...favorites, item]);
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar backgroundColor="#f8f8f8" barStyle="dark-content" />
-      
+
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Quick Translator</Text>
-        <TouchableOpacity 
-          style={styles.historyButton} 
-          onPress={() => setShowHistory(true)}
-        >
-          <Text style={{fontSize: 24, color: "#4B0082"}}>⏱️</Text>
-        </TouchableOpacity>
       </View>
-      
-      {/* Language Selection */}
+
       <LanguageSelector
         sourceLang={sourceLang}
         targetLang={targetLang}
         autoDetect={autoDetect}
-        onSourcePress={() => openLanguagePicker("source")}
-        onTargetPress={() => openLanguagePicker("target")}
+        onSourcePress={() => openLanguagePicker('source')}
+        onTargetPress={() => openLanguagePicker('target')}
         onSwapPress={swapLanguages}
       />
-      
-      {/* Auto-detect info */}
-      {autoDetect && detectResult ? (
-        <Text style={styles.detectResult}>{detectResult}</Text>
-      ) : null}
-      
-      {/* Input Area */}
-      <TranslationInput
-        text={text}
-        setText={setText}
-        clearText={clearText}
-      />
-      
-      {/* Auto-detect toggle */}
-      <TouchableOpacity 
-        style={styles.autoDetectToggle}
-        onPress={() => {
-          setAutoDetect(!autoDetect);
-          if (!autoDetect) {
-            setDetectResult("");
-          }
-        }}
-      >
-        <Text style={{fontSize: 20, color: "#4B0082"}}>
-          {autoDetect ? "☑" : "☐"}
-        </Text>
-        <Text style={styles.autoDetectText}>Tự động phát hiện ngôn ngữ</Text>
-      </TouchableOpacity>
-      
-      {/* Translate Button */}
-      <TouchableOpacity 
-        style={styles.translateButton} 
-        onPress={handleTranslate}
-        disabled={isLoading || !text.trim()}
-      >
-        {isLoading ? (
-          <ActivityIndicator size="small" color="#fff" />
-        ) : (
-          <Text style={styles.translateButtonText}>Dịch</Text>
-        )}
-      </TouchableOpacity>
-      
-      {/* Error message */}
-      {error ? (
-        <Text style={styles.errorText}>{error}</Text>
-      ) : null}
-      
-      {/* Output Area */}
-      {translatedText ? (
-        <TranslationResult
-          translatedText={translatedText}
-          onSpeak={speakTranslation}
-          onCopy={copyToClipboard}
-          onFavorite={() => {
-            const currentItem = history[0];
-            if (currentItem) {
-              toggleFavorite(currentItem);
-            }
-          }}
-          isFavorite={favorites.some(fav => fav.id === history[0]?.id)}
-        />
-      ) : null}
-      
-      {/* Language Picker Modal */}
+
       <LanguagePicker
         visible={showLanguagePicker}
         pickerType={pickerType}
         sourceLang={sourceLang}
         targetLang={targetLang}
-        autoDetect={autoDetect}
         onClose={() => setShowLanguagePicker(false)}
         onSelect={(code) => {
-          if (pickerType === "source") {
+          if (pickerType === 'source') {
             setSourceLang(code);
-            if (autoDetect) setAutoDetect(false);
           } else {
             setTargetLang(code);
           }
@@ -922,8 +788,7 @@ export default function App() {
           setShowLanguagePicker(false);
         }}
       />
-      
-      {/* History Modal */}
+
       <HistoryModal
         visible={showHistory}
         history={history}
@@ -932,9 +797,26 @@ export default function App() {
         onApplyItem={applyHistoryItem}
         onToggleFavorite={toggleFavorite}
       />
+
+      <TranslationInput
+        text={text}
+        setText={setText}
+        clearText={() => setText("")}
+      />
+
+      {translatedText && (
+        <TranslationResult
+          translatedText={translatedText}
+          onSpeak={speakTranslation}
+          onCopy={copyToClipboard}
+          onFavorite={() => toggleFavorite({ text, translatedText, sourceLang, targetLang })}
+          isFavorite={favorites.some(fav => fav.text === text)}
+        />
+      )}
     </SafeAreaView>
   );
 }
+
 ```
 
 ## 5. Chạy ứng dụng

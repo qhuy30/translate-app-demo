@@ -148,6 +148,196 @@ const styles = StyleSheet.create({
 });
 ```
 
+Bước 5: Tạo LanguageSelector Component
+Tạo file src/components/LanguageSelector.js:
+```sh
+import React from 'react';
+import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
+import { LANGUAGES } from '../constants/languages';
+
+export const LanguageSelector = ({
+  sourceLang,
+  targetLang,
+  autoDetect,
+  onSourcePress,
+  onTargetPress,
+  onSwapPress,
+}) => {
+  const getLanguageName = (code) => {
+    return LANGUAGES.find(lang => lang.code === code)?.name || code;
+  };
+
+  return (
+    <View style={styles.container}>
+      <TouchableOpacity style={styles.langButton} onPress={onSourcePress}>
+        <Text style={styles.langText}>
+          {autoDetect ? "Tự động phát hiện" : getLanguageName(sourceLang)}
+        </Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.swapButton} onPress={onSwapPress}>
+        <Text style={styles.swapButtonText}>⇄</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.langButton} onPress={onTargetPress}>
+        <Text style={styles.langText}>{getLanguageName(targetLang)}</Text>
+      </TouchableOpacity>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 16,
+  },
+  langButton: {
+    padding: 10,
+    borderRadius: 8,
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    minWidth: 120,
+    alignItems: 'center',
+  },
+  langText: {
+    fontSize: 16,
+    color: '#4B0082',
+  },
+  swapButton: {
+    padding: 10,
+    marginHorizontal: 10,
+  },
+  swapButtonText: {
+    fontSize: 24,
+    color: '#4B0082',
+  },
+});
+```
+
+Bước 8: Tạo Translation Utils
+Tạo file src/utils/translation.js:
+```sh
+// Đây là ví dụ sử dụng Google Translate API
+// Bạn cần thay thế bằng API key của riêng mình
+export const translateText = async (text, sourceLang, targetLang) => {
+  try {
+    const response = await fetch(
+      `https://translation-api-endpoint.com/translate`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer YOUR_API_KEY'
+        },
+        body: JSON.stringify({
+          text,
+          source: sourceLang,
+          target: targetLang
+        })
+      }
+    );
+    
+    const data = await response.json();
+    return data.translatedText;
+  } catch (error) {
+    console.error('Translation error:', error);
+    throw error;
+  }
+};
+
+export const detectLanguage = async (text) => {
+  try {
+    const response = await fetch(
+      `https://translation-api-endpoint.com/detect`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer YOUR_API_KEY'
+        },
+        body: JSON.stringify({ text })
+      }
+    );
+    
+    const data = await response.json();
+    return data.detectedLanguage;
+  } catch (error) {
+    console.error('Language detection error:', error);
+    throw error;
+  }
+};
+```
+Bước 9: Tạo TranslationResult Component
+Tạo file src/components/TranslationResult.js:
+```sh
+import React from 'react';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+
+export const TranslationResult = ({
+  translatedText,
+  onSpeak,
+  onCopy,
+  onFavorite,
+  isFavorite
+}) => {
+  return (
+    <View style={styles.container}>
+      <Text style={styles.resultText}>{translatedText}</Text>
+      
+      <View style={styles.actions}>
+        <TouchableOpacity style={styles.actionButton} onPress={onSpeak}>
+          <Text style={styles.actionButtonText}>🔊</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity style={styles.actionButton} onPress={onCopy}>
+          <Text style={styles.actionButtonText}>📋</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity style={styles.actionButton} onPress={onFavorite}>
+          <Text style={styles.actionButtonText}>
+            {isFavorite ? '⭐' : '☆'}
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    margin: 16,
+    padding: 16,
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#ddd',
+  },
+  resultText: {
+    fontSize: 16,
+    lineHeight: 24,
+    color: '#333',
+  },
+  actions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    marginTop: 16,
+  },
+  actionButton: {
+    padding: 8,
+    marginLeft: 16,
+  },
+  actionButtonText: {
+    fontSize: 20,
+  },
+});
+```
+Bước 10: Cập nhật App.js để tích hợp các components mới
+Cập nhật file App.js để thêm các components mới:
+```sh
+npx expo start
+```
+
 ## 5. Chạy ứng dụng
 
 Khởi chạy ứng dụng trên thiết bị hoặc trình giả lập:

@@ -11,7 +11,7 @@ npx create-expo-app translate-app --template blank
 
 Cài đặt các thư viện cần thiết:
 ```sh
-npm install @react-native-picker/picker expo-speech expo-clipboard
+npm install @react-native-async-storage/async-storage @react-native-picker/picker expo expo-clipboard expo-constants expo-haptics expo-speech expo-status-bar react react-native
 ```
 
 ## 3. Cấu trúc dự án
